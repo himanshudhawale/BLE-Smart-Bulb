@@ -49,8 +49,8 @@ public class MainActivity extends AppCompatActivity {
     Button buttonON, buttonOFF;
 
     TextView textView;
-    ImageView bulbOn, bulbOff;
-
+//    ImageView bulbOn, bulbOff;
+    Thread t;
     ToggleButton button;
 
     private static final int REQUEST_ENABLE_BT = 1;
@@ -78,8 +78,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int STATE_DISCONNECTED = 0;
     private static final int STATE_CONNECTING = 1;
     private static final int STATE_CONNECTED = 2;
-
-
+    Handler handler;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,10 +88,15 @@ public class MainActivity extends AppCompatActivity {
         buttonON = findViewById(R.id.buttonOnId);
         buttonOFF = findViewById(R.id.buttonOffId);
         textView = findViewById(R.id.tempID);
-        bulbOn = findViewById(R.id.imageView3);
-        bulbOff = findViewById(R.id.imageView2);
-        bulbOn.setVisibility(View.INVISIBLE);
-        button = findViewById(R.id.toggleButton);
+//        bulbOn = findViewById(R.id.imageView3);
+//        bulbOff = findViewById(R.id.imageView2);
+//        bulbOn.setVisibility(View.INVISIBLE);
+         button = findViewById(R.id.toggleButton);
+         button.setText("Buzz");
+        button.setTextOn("Buzz");
+        button.setTextOff("Buzz");
+
+        handler = new Handler();
 
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.READ_CONTACTS)
@@ -159,6 +163,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
 
     }
 
@@ -306,16 +311,6 @@ public class MainActivity extends AppCompatActivity {
             characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
             gatt.setCharacteristicNotification(characteristic, true);
 
-            BluetoothGattCharacteristic characteristic1 = service.getCharacteristic(MY_CHARACTERISTIC_BULB);
-            characteristic1.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
-            gatt.setCharacteristicNotification(characteristic1, true);
-
-            // Write on the config descriptor to be notified when the value changes
-            BluetoothGattDescriptor descriptor1 =
-                    characteristic1.getDescriptor(UUID.fromString("00002934-0000-1000-8000-00805f9b34fb"));
-            descriptor1.setValue(new byte[] {1});
-            gatt.writeDescriptor(descriptor1);
-
             // Write on the config descriptor to be notified when the value changes
             BluetoothGattDescriptor descriptor =
                     characteristic.getDescriptor(UUID.fromString("00002934-0000-1000-8000-00805f9b34fb"));
@@ -396,34 +391,43 @@ public class MainActivity extends AppCompatActivity {
     private void readCounterCharacteristic(final BluetoothGattCharacteristic
                                                    characteristic) {
         if (MY_CHARACTERISTIC.equals(characteristic.getUuid())) {
+//            runOnUiThread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    byte[] data = characteristic.getValue();
+//                    // Update UI
+//                    textView.setText(new String(data));
+//                }
+//            });
+
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    byte[] data = characteristic.getValue();
-                    // Update UI
-                    textView.setText(new String(data));
+                    textView.setText(new String(characteristic.getValue()) + " F");
                 }
             });
-        }
 
-            else if (MY_CHARACTERISTIC_BULB.equals(characteristic.getUuid())) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        // Update UI
-                        String s = new String(characteristic.getValue());
-                        if (s.equals("1")) {
-                            bulbOff.setVisibility(View.INVISIBLE);
-                            bulbOn.setVisibility(View.VISIBLE);
 
-                        } else {
-                            bulbOff.setVisibility(View.VISIBLE);
-                            bulbOn.setVisibility(View.INVISIBLE);
-                        }
+    }
 
-                    }
-                });
-            }
+//            else if (MY_CHARACTERISTIC_BULB.equals(characteristic.getUuid())) {
+//                runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        // Update UI
+//                        String s = new String(characteristic.getValue());
+//                        if (s.equals("1")) {
+//                            bulbOff.setVisibility(View.INVISIBLE);
+//                            bulbOn.setVisibility(View.VISIBLE);
+//
+//                        } else {
+//                            bulbOff.setVisibility(View.VISIBLE);
+//                            bulbOn.setVisibility(View.INVISIBLE);
+//                        }
+//
+//                    }
+//                });
+//            }
     }
 
 
